@@ -1,26 +1,184 @@
 @import "tailwindcss";
 
+/* ============================================
+   SkillHub - Custom Theme (Tailwind v4)
+   Based on index.html design
+============================================ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Background */
+  --background: #FFFBF8;
+  --foreground: #1e2126;
+  
+  /* Coral (Primary) */
+  --coral-50: #FFF5F3;
+  --coral-100: #FFE8E3;
+  --coral-200: #FFC9BA;
+  --coral-300: #FF9E8A;
+  --coral-400: #FF7058;
+  --coral-500: #FF4D3D;
+  --coral-600: #E63E2A;
+  --coral-700: #CC2E1F;
+  --coral-800: #A62418;
+  --coral-900: #7D1F15;
+  
+  /* Cream */
+  --cream-50: #FFFBF8;
+  --cream-100: #FFF5EE;
+  --cream-200: #FFEBD9;
+  --cream-300: #FFD9B8;
+  
+  /* Sage */
+  --sage-50: #F6F7F5;
+  --sage-100: #E8EBE5;
+  --sage-200: #D1D9CC;
+  --sage-300: #AAC0A8;
+  --sage-400: #7FA37D;
+  --sage-500: #5B8A5A;
+  --sage-600: #467046;
+  --sage-700: #375738;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: 'Noto Sans KR', sans-serif;
+  
+  /* Coral Colors */
+  --color-coral-50: var(--coral-50);
+  --color-coral-100: var(--coral-100);
+  --color-coral-200: var(--coral-200);
+  --color-coral-300: var(--coral-300);
+  --color-coral-400: var(--coral-400);
+  --color-coral-500: var(--coral-500);
+  --color-coral-600: var(--coral-600);
+  --color-coral-700: var(--coral-700);
+  --color-coral-800: var(--coral-800);
+  --color-coral-900: var(--coral-900);
+  
+  /* Cream Colors */
+  --color-cream-50: var(--cream-50);
+  --color-cream-100: var(--cream-100);
+  --color-cream-200: var(--cream-200);
+  --color-cream-300: var(--cream-300);
+  
+  /* Sage Colors */
+  --color-sage-50: var(--sage-50);
+  --color-sage-100: var(--sage-100);
+  --color-sage-200: var(--sage-200);
+  --color-sage-300: var(--sage-300);
+  --color-sage-400: var(--sage-400);
+  --color-sage-500: var(--sage-500);
+  --color-sage-600: var(--sage-600);
+  --color-sage-700: var(--sage-700);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Custom Utilities */
+.gradient-text {
+  background: linear-gradient(135deg, #FF4D3D 0%, #FF7058 50%, #FF9E8A 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-gradient {
+  background: linear-gradient(135deg, #FFF5F3 0%, #FFE8E3 30%, #FFF5EE 70%, #F6F7F5 100%);
+}
+
+.card-hover {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 25px 50px -12px rgba(255, 77, 61, 0.15);
+}
+
+.btn-primary {
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(255, 77, 61, 0.4);
+}
+
+.nav-blur {
+  backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.scroll-section {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.scroll-section.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.pattern-bg {
+  background-image: 
+    radial-gradient(circle at 25% 25%, rgba(255, 77, 61, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(91, 138, 90, 0.03) 0%, transparent 50%);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #FFF5EE;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #FF9E8A;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #FF7058;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.8s ease-out forwards;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
 }
