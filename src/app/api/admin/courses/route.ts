@@ -97,7 +97,8 @@ export async function POST(request: Request) {
                     is_published: body.is_published !== undefined ? body.is_published : true,
                     published_at: body.published_at || new Date().toISOString(),
                     start_date: body.start_date || new Date().toISOString(),
-                    original_price: body.original_price ? Number(body.original_price) : null
+                    original_price: body.original_price ? Number(body.original_price) : null,
+                    max_stock: body.max_stock ? Number(body.max_stock) : null // Added max_stock
                 }
             ])
             .select()
@@ -148,6 +149,7 @@ export async function PUT(request: Request) {
                 published_at: body.published_at || new Date().toISOString(),
                 start_date: body.start_date || new Date().toISOString(),
                 original_price: body.original_price ? Number(body.original_price) : null,
+                max_stock: body.max_stock ? Number(body.max_stock) : null, // Added max_stock
                 updated_at: new Date().toISOString()
             })
             .eq('id', id)

@@ -21,7 +21,8 @@ export default function EditCoursePage() {
         category_id: '',
         level: 'beginner',
         thumbnail_url: '',
-        is_published: true
+        is_published: true,
+        max_stock: '' // 추가
     });
 
     // Lessons Data
@@ -55,7 +56,8 @@ export default function EditCoursePage() {
                 category_id: data.category?.id || '',
                 level: data.level || 'beginner',
                 thumbnail_url: data.thumbnail_url || '',
-                is_published: data.is_published
+                is_published: data.is_published,
+                max_stock: data.max_stock ? data.max_stock.toString() : '' // 추가
             });
 
             // Sort lessons by order
@@ -90,7 +92,8 @@ export default function EditCoursePage() {
                 body: JSON.stringify({
                     id: courseId,
                     ...formData,
-                    original_price: formData.original_price ? Number(formData.original_price) : null
+                    original_price: formData.original_price ? Number(formData.original_price) : null,
+                    max_stock: (formData as any).max_stock ? Number((formData as any).max_stock) : null // 추가
                 })
             });
 
@@ -187,6 +190,24 @@ export default function EditCoursePage() {
                             <div>
                                 <label className="block text-sm font-semibold text-slate-700 mb-2">정가 (할인 전)</label>
                                 <input type="number" name="original_price" value={formData.original_price} onChange={handleChange} className="w-full px-4 py-3 rounded-lg border border-slate-200 bg-slate-50" />
+                            </div>
+                        </div>
+
+                        {/* 재고 설정 추가 */}
+                        <div>
+                            <label className="block text-sm font-semibold text-slate-700 mb-2">최대 판매 수량 (재고)</label>
+                            <div className="flex items-center gap-4">
+                                <input
+                                    type="number"
+                                    name="max_stock"
+                                    value={(formData as any).max_stock || ''}
+                                    onChange={handleChange}
+                                    className="flex-1 px-4 py-3 rounded-lg border border-slate-200 focus:outline-none focus:border-coral-500"
+                                    placeholder="비워두면 무제한"
+                                />
+                                <span className="text-sm text-slate-500">
+                                    {(formData as any).max_stock ? `${(formData as any).max_stock}개 한정 판매` : '무제한 판매 중'}
+                                </span>
                             </div>
                         </div>
 

@@ -49,6 +49,26 @@ export default function OrdersPage() {
         }
     };
 
+    const handleCancel = async (orderId: string) => {
+        if (!confirm('정말로 주  취소하시겠습니까?')) return;
+
+        try {
+            const res = await fetch(`/api/orders/${orderId}`, {
+                method: 'DELETE',
+            });
+
+            if (res.ok) {
+                alert('주문이 취소되었습니다.');
+                fetchOrders(); // 목록 새로고침
+            } else {
+                const data = await res.json();
+                alert(data.error || '취소 실패');
+            }
+        } catch (error) {
+            alert('오류가 발생했습니다.');
+        }
+    };
+
     if (authLoading || loading) return <div className="p-10 text-center text-slate-500">로딩 중...</div>;
     if (!user) return <div className="p-10 text-center text-slate-500">로그인이 필요합니다.</div>;
 
@@ -66,6 +86,7 @@ export default function OrdersPage() {
                                 <th className="px-6 py-4 text-sm font-bold text-slate-600">주문상품</th>
                                 <th className="px-6 py-4 text-sm font-bold text-slate-600">결제금액</th>
                                 <th className="px-6 py-4 text-sm font-bold text-slate-600">상태</th>
+                                <th className="px-6 py-4 text-sm font-bold text-slate-600">관리</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50">
@@ -88,11 +109,21 @@ export default function OrdersPage() {
                                                 {getStatusText(order.status)}
                                             </span>
                                         </td>
+                                        <td className="px-6 py-6">
+                                            {order.status === 'pending' && (
+                                                <button
+                                                    onClick={() => handleCancel(order.id)}
+                                                    className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1.5 rounded transition-colors"
+                                                >
+                                                    주문 취소
+                                                </button>
+                                            )}
+                                        </td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan={4} className="px-6 py-20 text-center text-slate-400">
+                                    <td colSpan={5} className="px-6 py-20 text-center text-slate-400">
                                         주문 내역이 존재하지 않습니다.
                                     </td>
                                 </tr>

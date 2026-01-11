@@ -30,7 +30,7 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: '이미 수강 중인 강의입니다.' }, { status: 409 });
         }
 
-        // 2. Fetch Course Info (Price Source of Truth) OR Use Provided Amount (Test Mode)
+        // 2. Fetch Course Info
         let amount = 0;
         let courseTitle = 'Test Product';
         let course = null;
@@ -43,43 +43,57 @@ export async function POST(request: Request) {
                 .single();
 
             if (courseError || !fetchCourse) {
-                console.error('[Payment Prepare] Course Fetch Error:', courseError);
                 return NextResponse.json({ error: 'Course not found' }, { status: 404 });
             }
             course = fetchCourse;
             amount = course.price;
             courseTitle = course.title;
-            console.log(`[Payment Prepare] Course Found: ${course.title} (${course.price})`);
         } else {
-            // For Generic Testing (e.g. from Payment Test Page)
-            // Allow 'totalAmount' from body if courseId is missing
             if (!body.totalAmount) {
                 return NextResponse.json({ error: 'Course ID or Total Amount is required' }, { status: 400 });
             }
             amount = body.totalAmount;
             courseTitle = body.orderName || 'Generic Test Order';
-            console.log(`[Payment Prepare] Generic Order: ${courseTitle} (${amount})`);
         }
 
-        // 3. Create Unique Merchant UID
-        const merchantUid = `ORD-${uuidv4()}`;
+        // 3. Check for Existing Pending Payment (Resume Order)
+        let merchantUid: string;
 
-        // 4. Save Pending Payment to DB
-        const { error: insertError } = await supabase
+        const { data: existingPayment } = await supabase
             .from('skillhub_payments')
-            .insert({
-                user_id: user.id,
-                course_id: course?.id || null, // Allow null for test orders
-                merchant_uid: merchantUid,
-                amount: amount,
-                status: 'pending',
-                payment_method: 'card' // Default, will update later
-            });
+            .select('merchant_uid, amount')
+            .eq('user_id', user.id)
+            .eq('course_id', courseId)
+            .eq('status', 'pending')
+            .order('created_at', { ascending: false }) // Get most recent
+            .limit(1)
+            .single();
 
-        if (insertError) {
-            console.error('[Payment Prepare] DB Insert Error:', insertError);
-            throw insertError;
+        if (existingPayment) {
+            console.log(`[Payment Prepare] Resuming existing order: ${existingPayment.merchant_uid}`);
+            merchantUid = existingPayment.merchant_uid;
+
+            // Optional: Update amount if course price changed (not implemented here for safety)
+        } else {
+            // 4. Create New Merchant UID
+            merchantUid = `ORD-${uuidv4()}`;
+
+            // 5. Save Pending Payment to DB
+            const { error: insertError } = await supabase
+                .from('skillhub_payments')
+                .insert({
+                    user_id: user.id,
+                    course_id: course?.id || null,
+                    merchant_uid: merchantUid,
+                    amount: amount,
+                    status: 'pending',
+                    payment_method: 'card'
+                });
+
+            if (insertError) throw insertError;
         }
+
+        // Insert logic moved above
 
         console.log(`[Payment Prepare] Success: ${merchantUid}`);
 

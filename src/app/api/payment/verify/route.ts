@@ -13,11 +13,17 @@ export async function POST(request: Request) {
         // Admin 클라이언트 생성 (RLS 우회 - 확실한 상태 업데이트를 위해)
         const supabaseAdmin = createAdminClient();
 
-        // 1. DB에서 결제 준비 정보 가져오기 (Expected Data)
-        // Admin 권한으로 조회 (User RLS 무관하게 조회)
+        // 1. DB에서 결제 준비 정보 가져오기 (Expected Data) - 재고 확인을 위해 course 정보도 함께 로드
         const { data: prePayment, error: preError } = await supabaseAdmin
             .from('skillhub_payments')
-            .select('*')
+            .select(`
+                *,
+                course:skillhub_courses (
+                    id,
+                    max_stock,
+                    student_count
+                )
+            `)
             .eq('merchant_uid', merchantUid)
             .single();
 
@@ -28,6 +34,35 @@ export async function POST(request: Request) {
         // 이미 처리된 결제라면 성공 응답 (중복 처리 방지 - Idempotency)
         if (prePayment.status === 'paid') {
             return NextResponse.json({ success: true, message: "이미 처리된 결제입니다." });
+        }
+
+        // 🎯 재고 확인 (First-Come, First-Served)
+        const course = prePayment.course as any; // Type assertion for joined data
+        if (course && course.max_stock !== null && course.student_count >= course.max_stock) {
+            console.error(`[Sold Out] Course ${course.id} is full. Max: ${course.max_stock}, Current: ${course.student_count}`);
+
+            // ⚠️ 결제 취소 (환불) 로직
+            try {
+                await fetch(`https://api.portone.io/payments/${paymentId}/cancel`, {
+                    method: 'POST',
+                    headers: {
+                        Authorization: `PortOne ${process.env.PORTONE_API_SECRET}`,
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ reason: '재고 소진으로 인한 자동 취소' })
+                });
+            } catch (refundError) {
+                console.error('Auto-refund failed:', refundError);
+                // 사람이 수동으로 환불해야 함을 로그로 남김
+            }
+
+            // DB 업데이트 (실패 처리)
+            await supabaseAdmin
+                .from('skillhub_payments')
+                .update({ status: 'failed', payment_id: paymentId })
+                .eq('merchant_uid', merchantUid);
+
+            return NextResponse.json({ error: '죄송합니다. 재고가 소진되어 결제가 취소되었습니다.' }, { status: 409 });
         }
 
         // 2. 포트원 서버에서 실제 결제 내역 조회 (Actual Data)

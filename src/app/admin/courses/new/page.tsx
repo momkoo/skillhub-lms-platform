@@ -18,7 +18,8 @@ export default function NewCoursePage() {
         thumbnail_url: '',
         is_published: true,
         published_at: '',
-        start_date: ''
+        start_date: '',
+        max_stock: '' // 추가
     });
 
     const handleModeChange = (mode: string) => {
@@ -130,9 +131,9 @@ export default function NewCoursePage() {
                         />
                     </div>
 
-                    {/* 가격 & 레벨 */}
+                    {/* 가격 & 레벨 & 재고 */}
                     <div className="grid grid-cols-2 gap-6">
-                        <div>
+                        <div className="col-span-2 md:col-span-1">
                             <label className="block text-sm font-semibold text-slate-700 mb-2">가격 설정 (할인율 적용)</label>
                             <div className="space-y-4">
                                 {/* 정가 입력 */}
@@ -194,18 +195,33 @@ export default function NewCoursePage() {
                                 )}
                             </div>
                         </div>
-                        <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-2">난이도</label>
-                            <select
-                                name="level"
-                                value={formData.level}
-                                onChange={handleChange}
-                                className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:outline-none focus:border-coral-500"
-                            >
-                                <option value="beginner">입문 (Beginner)</option>
-                                <option value="intermediate">중급 (Intermediate)</option>
-                                <option value="advanced">고급 (Advanced)</option>
-                            </select>
+                        <div className="space-y-6 md:col-span-1">
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">난이도</label>
+                                <select
+                                    name="level"
+                                    value={formData.level}
+                                    onChange={handleChange}
+                                    className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:outline-none focus:border-coral-500"
+                                >
+                                    <option value="beginner">입문 (Beginner)</option>
+                                    <option value="intermediate">중급 (Intermediate)</option>
+                                    <option value="advanced">고급 (Advanced)</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">최대 판매 수량 (재고)</label>
+                                <input
+                                    type="number"
+                                    name="max_stock"
+                                    value={(formData as any).max_stock || ''}
+                                    onChange={handleChange}
+                                    className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:outline-none focus:border-coral-500"
+                                    placeholder="비워두면 무제한 판매"
+                                />
+                                <p className="text-xs text-slate-500 mt-1">* 입력하지 않으면 수량 제한 없이 판매됩니다.</p>
+                            </div>
                         </div>
                     </div>
 
